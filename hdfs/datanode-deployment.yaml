@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdfs-datanode
+  namespace: hdfs
+  labels:
+    app: hdfs
+    component: datanode
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hdfs
+      component: datanode
+  template:
+    metadata:
+      labels:
+        app: hdfs
+        component: datanode
+    spec:
+      containers:
+      - name: datanode
+        image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+        ports:
+        - containerPort: 9864 # DataNode UI
+        env:
+        - name: CORE_CONF_fs_defaultFS
+          value: "hdfs://hdfs-namenode:9000"
+        volumeMounts:
+        - mountPath: /hadoop/dfs/data
+          name: datanode-storage
+      volumes:
+      - name: datanode-storage
+        emptyDir: {}

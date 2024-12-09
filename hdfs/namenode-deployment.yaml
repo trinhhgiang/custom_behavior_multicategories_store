@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdfs-namenode
+  namespace: hdfs
+  labels:
+    app: hdfs
+    component: namenode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hdfs
+      component: namenode
+  template:
+    metadata:
+      labels:
+        app: hdfs
+        component: namenode
+    spec:
+      containers:
+      - name: namenode
+        image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+        ports:
+        - containerPort: 9870 # NameNode UI
+        - containerPort: 9000 # NameNode RPC
+        env:
+        - name: CLUSTER_NAME
+          value: "hdfs-cluster"
+        volumeMounts:
+        - mountPath: /hadoop/dfs/name
+          name: namenode-storage
+      volumes:
+      - name: namenode-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-namenode
+spec:
+  ports:
+  - name: rpc
+    port: 9000
+    targetPort: 9000
+  - name: ui
+    port: 9870
+    targetPort: 9870
+  selector:
+    app: hdfs
+    component: namenode
